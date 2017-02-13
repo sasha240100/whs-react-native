@@ -5,7 +5,7 @@ module.exports = (data, callback) => {
   //  * AmmoNext: a massive JS file produced by emscripten
   //  * three.js: Already compiled
   //  * three-orbit-controls: unused
-  if (/(react-whs|whitestorm\.js|three)/.test(data.filename)) {
+  if (/(react\-whs|whitestorm\.js|three)/.test(data.filename)) {
     callback(null, { code: data.sourceCode });
   } else {
     transformer(data, callback);

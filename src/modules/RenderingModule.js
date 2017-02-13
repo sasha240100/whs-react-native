@@ -25,6 +25,7 @@ export default class RenderingModule {
       renderer: {}
     }, params);
 
+    console.log("RenderingModule 1");
     this.renderer = new WebGLRenderer(this.params.renderer);
     this.applyAdditional('shadow', isShadow);
 
@@ -37,6 +38,8 @@ export default class RenderingModule {
       Number(this.params.width * this.params.resolution.x).toFixed(),
       Number(this.params.height * this.params.resolution.y).toFixed()
     );
+
+    console.log("RenderingModule");
   }
 
   applyAdditional(name, isApplied = false) {
@@ -44,10 +47,19 @@ export default class RenderingModule {
     RenderingModule.additional[name].apply(this, [this.renderer]);
   }
 
-  integrateRenderer(element, scene, camera) {
+  integrateRenderer(scene, camera) {
     this.scene = scene;
     this.camera = camera;
-    this.renderLoop = new Loop(() => this.renderer.render(this.scene, this.camera));
+
+    const gl = this.params.renderer.context;
+
+    console.log("integrateRenderer");
+
+    this.renderLoop = new Loop(() => {
+      this.renderer.render(this.scene, this.camera);
+      gl.flush();
+      gl.endFrameEXP();
+    });
     // this.attachToCanvas(element);
 
     return this.renderLoop;
@@ -68,7 +80,6 @@ export default class RenderingModule {
 
   manager(manager) {
     this.renderLoop = this.integrateRenderer(
-      manager.get('element'),
       manager.get('scene'),
       manager.get('camera').native
     );

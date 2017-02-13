@@ -1,6 +1,6 @@
 import { Dimensions } from 'react-native';
 import present from 'present';
-import Symbol from 'es6-symbol';
+import Symbol from 'symbol';
 
 class DOMNode {
   constructor(nodeName) {
@@ -56,6 +56,8 @@ let { width, height } = Dimensions.get('window');
 window.innerWidth = width;
 window.innerHeight = height;
 window.document = new DOMDocument();
+window.addEventListener = () => {};
+window.removeEventListener = () => {};
 
 global.performance = null;
 
@@ -63,4 +65,4 @@ global.performance = {
   now: present
 };
 
-global.Symbol = Symbol;
+// global.Symbol = Symbol;
