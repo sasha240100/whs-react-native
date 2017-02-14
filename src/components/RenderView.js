@@ -7,6 +7,27 @@ import RenderingModule from '../modules/RenderingModule';
 import * as WHS from 'whs';
 
 export default class RenderView extends React.Component {
+  static glToParams(gl) {
+    return {
+      renderer: {
+        canvas: {
+          width: gl.drawingBufferWidth,
+          height: gl.drawingBufferHeight,
+          style: {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          clientHeight: gl.drawingBufferHeight,
+          clientWidth: gl.drawingBufferWidth
+        },
+        context: gl
+      },
+
+      width: gl.drawingBufferWidth,
+      height: gl.drawingBufferHeight,
+      aspect: gl.drawingBufferWidth / gl.drawingBufferHeight
+    };
+  }
+
   constructor(...props) {
     super(...props);
 
@@ -35,22 +56,7 @@ export default class RenderView extends React.Component {
           else return getParameter(value);
         }
 
-        let threeRendererOptions = {
-          canvas: {
-            width: gl.drawingBufferWidth,
-            height: gl.drawingBufferHeight,
-            style: {},
-            addEventListener: () => {},
-            removeEventListener: () => {},
-            clientHeight: gl.drawingBufferHeight,
-            clientWidth: gl.drawingBufferWidth
-          },
-          context: gl
-        };
-
-        this.rendererParams = threeRendererOptions;
-
-        resolve(this.rendererParams);
+        resolve(gl);
       };
     });
   }

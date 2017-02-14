@@ -48,17 +48,13 @@ class Application extends React.Component {
             ]}
 
             afterMount={function (glResolver) {
-              glResolver.then(params => {
-                // console.log(params);
-
-                console.log(`width: ${params.canvas.width}`);
-                console.log(`height: ${params.canvas.height}`)
-                console.log('TADA');
+              glResolver.then(gl => {
+                const params = RenderView.glToParams(gl);
 
                 this.native
                   .module(new CameraModule({
                     camera: {
-                      aspect: params.canvas.width / params.canvas.height
+                      aspect: params.aspect
                     },
 
                     position: new THREE.Vector3(0, 10, 50)
@@ -66,10 +62,10 @@ class Application extends React.Component {
                   .module(new RenderingModule({
                     bgColor: 0x162129,
 
-                    width: params.canvas.width,
-                    height: params.canvas.height,
+                    width: params.width,
+                    height: params.height,
 
-                    renderer: params
+                    renderer: params.renderer
                   }, {shadow: true}))
                   .module(new OrbitModule({target: new THREE.Vector3(0, 5, 0)}, false));
               });
