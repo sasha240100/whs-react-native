@@ -10,19 +10,21 @@ export default class RenderView extends React.Component {
   constructor(...props) {
     super(...props);
 
+    this.helper = 2;
+
     this.glResolver = new Promise((resolve) => {
       this.onContextCreate = (gl) => {
-        gl.createFramebuffer = () => {
-          return null;
-        };
-
+        // gl.createFramebuffer = () => {
+        //   return null;
+        // };
+        //
         gl.createRenderbuffer = () => {
           return null;
         };
 
         gl.bindRenderbuffer = (target, renderbuffer) => {};
         gl.renderbufferStorage = (target, internalFormat, width, height) => {};
-        gl.framebufferTexture2D = (target, attachment, textarget, texture, level) => {};
+        // gl.framebufferTexture2D = (target, attachment, textarget, texture, level) => {};
         gl.framebufferRenderbuffer = (target, attachmebt, renderbuffertarget, renderbuffer) => {};
         gl.VERSION = 7938;
 
@@ -32,7 +34,6 @@ export default class RenderView extends React.Component {
           if (value === gl.VERSION) return "WebGL 1.0 (OpenGL ES 2.0 Chromium)";
           else return getParameter(value);
         }
-
 
         let threeRendererOptions = {
           canvas: {
@@ -54,62 +55,47 @@ export default class RenderView extends React.Component {
     });
   }
 
-  // _handleResponderGrant = (event) => {
-  //   this._update(event);
-  // };
-  //
-  // _handleResponderMove = (event) => {
-  //   this._update(event);
-  // };
-  //
-  // _handleResponderRelease = (event) => {
-  //   this.singleTouchMice.forEach(mouse => {
-  //     mouse.handleResponderRelease(event);
-  //   });
-  //   this.singleTouchMice.length = 0;
-  //   this.previousTouchIdentifiers.length = 0;
-  // };
-  //
-  // _handleResponderTerminate = (event) => {
-  //   this.singleTouchMice.forEach(mouse => {
-  //     mouse.handleResponderTerminate(event);
-  //   });
-  //   this.singleTouchMice.length = 0;
-  //   this.previousTouchIdentifiers.length = 0;
-  // };
-
   wrapChild(child) {
+    const view = this;
+
     return React.cloneElement(child, {
       afterMountParams: this.glResolver,
-      handleRenderView: app => {
-        this.app = app;
+      passAppToView: (app) => {
+        view.app = app.native;
+        view.element = app.element;
       }
     });
   }
 
-  handleEvent(event) {
-    return function (e) {
-      if (this.app) this.app.emit(event, e);
-    }
-  }
-
   render() {
-    const handleEvent = this.handleEvent.bind(this);
+    const handleEvents = event => e => {
+      const evt = e.nativeEvent;
+      evt.preventDefault = () => {};
+      evt.stopPropagation = () => {};
+
+      this.app.emit(event, evt);
+    };
+
+    const child = this.wrapChild(this.props.children);
 
     return (
       <View style={{ flex: 1 }}>
         <Exponent.GLView
           style={{ flex: 1 }}
           key='gl-view'
+          onLayout={(evt) => {
+            this.element.clientWidth = evt.nativeEvent.layout.width;
+            this.element.clientHeight = evt.nativeEvent.layout.height;
+          }}
           onContextCreate={this.onContextCreate}
           onStartShouldSetResponder={event => true}
-          onResponderGrant={handleEvent('touchstart')}
-          onResponderMove={handleEvent('move')}
-          onResponderRelease={handleEvent('touchend')}
+          onResponderGrant={handleEvents('touchstart')}
+          onResponderMove={handleEvents('touchmove')}
+          onResponderRelease={handleEvents('touchend')}
           onResponderTerminationRequest={event => true}
-          onResponderTerminate={handleEvent('touchcancel')}
+          onResponderTerminate={handleEvents('touchcancel')}
         />
-        {this.wrapChild(this.props.children)}
+        <View style={{ flex: 0 }}>{child}</View>
       </View>
     );
   }

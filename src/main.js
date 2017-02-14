@@ -35,6 +35,8 @@ import RenderView from './components/RenderView';
 import RenderingModule from './modules/RenderingModule';
 import RandomMaterial from './modules/RandomMaterial';
 
+console.disableYellowBox = true;
+
 class Application extends React.Component {
   render() {
     return (
@@ -42,25 +44,34 @@ class Application extends React.Component {
         <RenderView>
           <App
             modules={[
-              new SceneModule(),
-              new CameraModule({
-                position: {
-                  z: 50
-                }
-              })
+              new SceneModule()
             ]}
 
             afterMount={function (glResolver) {
               glResolver.then(params => {
                 // console.log(params);
 
+                console.log(`width: ${params.canvas.width}`);
+                console.log(`height: ${params.canvas.height}`)
+                console.log('TADA');
+
                 this.native
+                  .module(new CameraModule({
+                    camera: {
+                      aspect: params.canvas.width / params.canvas.height
+                    },
+
+                    position: new THREE.Vector3(0, 10, 50)
+                  }))
                   .module(new RenderingModule({
                     bgColor: 0x162129,
 
+                    width: params.canvas.width,
+                    height: params.canvas.height,
+
                     renderer: params
-                  }, {shadow: true}));
-                  // .module(new OrbitModule({}, false));
+                  }, {shadow: true}))
+                  .module(new OrbitModule({target: new THREE.Vector3(0, 5, 0)}, false));
               });
             }}
 
@@ -68,7 +79,7 @@ class Application extends React.Component {
           >
             <Sphere
               geometry={{
-                radius: 15,
+                radius: 5,
                 widthSegments: 32,
                 heightSegments: 32
               }}
@@ -77,11 +88,7 @@ class Application extends React.Component {
                 color: 0xF2F2F2
               })}
 
-              modules={[
-                new RandomMaterial()
-              ]}
-
-              position={new THREE.Vector3(30, 40, 0)}
+              position={new THREE.Vector3(0, 5, 0)}
             />
 
             <Plane
@@ -90,7 +97,7 @@ class Application extends React.Component {
                 height: 100
               }}
 
-              material={new THREE.MeshPhongMaterial({color: 0x447F8B})}
+              material={new THREE.MeshPhongMaterial({color: 0x447F8B, side: THREE.DoubleSide})}
 
               position={new THREE.Vector3(0, -5, 0)}
 
